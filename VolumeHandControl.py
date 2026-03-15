@@ -18,8 +18,6 @@ cap.set(cv2.CAP_PROP_FPS, 60) # Try to force 60 FPS request to camera
 
 pTime = 0
 volPer = 0
-smoothVol = 0  # To store the smoothed volume over time
-smoothing_factor = 0.1  # The lower the value, the smoother but slower the volume changes
 
 # Hand detector
 detector = htm.handDetector(detectionCon=0.7)
@@ -47,17 +45,22 @@ while True:
         length = math.hypot(x2 - x1, y2 - y1)
 
         # Adjusted range for webcam
-        targetVol = np.interp(length, [30, 200], [0, 100])
+        rawVol = int(np.interp(length, [30, 200], [0, 100]))
         
-        # Apply Exponential Moving Average (EMA) smoothing
-        smoothVol = smoothVol + (targetVol - smoothVol) * smoothing_factor
-        volPer = int(smoothVol)
+        # Instant 'Deadband' smoothing: Only change volume if fingers moved significantly
+        if 'last_vol' not in locals():
+            last_vol = rawVol
+            
+        if abs(rawVol - last_vol) > 3 or rawVol == 0 or rawVol == 100:
+            volPer = rawVol
+        else:
+            volPer = last_vol
 
         # Use a background thread to call osascript to prevent blocking the camera frame capturing
         def set_mac_volume(v):
             os.system(f"osascript -e 'set volume output volume {v}'")
 
-        if 'last_vol' not in locals() or last_vol != volPer:
+        if last_vol != volPer:
             threading.Thread(target=set_mac_volume, args=(volPer,)).start()
             last_vol = volPer
 
