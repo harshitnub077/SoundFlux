@@ -4,6 +4,7 @@ import numpy as np
 import HandTrackingModule as htm
 import math
 import os
+import threading
 
 # Camera size
 wCam, hCam = 640, 480
@@ -47,10 +48,12 @@ while True:
         volPer = np.interp(length, [30, 200], [0, 100])
         volPer = int(volPer)
 
-        # Only call osascript if volume actually changed to prevent extreme macOS lag
-        # osascript is VERY slow to call repeatedly every frame
+        # Use a background thread to call osascript to prevent blocking the camera frame capturing
+        def set_mac_volume(v):
+            os.system(f"osascript -e 'set volume output volume {v}'")
+
         if 'last_vol' not in locals() or last_vol != volPer:
-            os.system(f"osascript -e 'set volume output volume {volPer}'")
+            threading.Thread(target=set_mac_volume, args=(volPer,)).start()
             last_vol = volPer
 
         # Draw circles and line
