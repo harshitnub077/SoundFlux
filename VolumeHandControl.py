@@ -9,9 +9,11 @@ import os
 wCam, hCam = 640, 480
 
 # Use Mac webcam
-cap = cv2.VideoCapture(0)
-cap.set(3, wCam)
-cap.set(4, hCam)
+# Using CAP_AVFOUNDATION directly often speeds up initialization and frame grabs on macOS
+cap = cv2.VideoCapture(0, cv2.CAP_AVFOUNDATION)
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, wCam)
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT, hCam)
+cap.set(cv2.CAP_PROP_FPS, 60) # Try to force 60 FPS request to camera
 
 pTime = 0
 volPer = 0
@@ -45,8 +47,11 @@ while True:
         volPer = np.interp(length, [30, 200], [0, 100])
         volPer = int(volPer)
 
-        # Set Mac volume
-        os.system(f"osascript -e 'set volume output volume {volPer}'")
+        # Only call osascript if volume actually changed to prevent extreme macOS lag
+        # osascript is VERY slow to call repeatedly every frame
+        if 'last_vol' not in locals() or last_vol != volPer:
+            os.system(f"osascript -e 'set volume output volume {volPer}'")
+            last_vol = volPer
 
         # Draw circles and line
         cv2.circle(img, (x1, y1), 12, (255, 0, 255), cv2.FILLED)
