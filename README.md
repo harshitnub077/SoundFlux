@@ -22,12 +22,6 @@ To install the required packages:
 pip install opencv-python mediapipe numpy sounddevice
 ```
 
-## How to use
-
-Run the volume control script:
-```bash
-python VolumeHandControl.py
-```
 
 Once tracking starts, place your hand in front of the camera:
 - **Thumb and Index Finger:** The distance between the tip of your thumb and the tip of your index finger determines the volume.
