@@ -16,12 +16,6 @@ It uses your computer's webcam to detect your hand and calculates the distance b
 - `VolumeHandControl.py`: Contains the main loop that captures the camera feed, calculates finger distance, and changes your system volume accordingly.
 - `HandTrackingMin.py` / `MyNewGameHandTracking.py`: Additional examples for hand-tracking detection.
 
-## Requirements
-To install the required packages:
-```bash
-pip install opencv-python mediapipe numpy sounddevice
-```
-
 
 Once tracking starts, place your hand in front of the camera:
 - **Thumb and Index Finger:** The distance between the tip of your thumb and the tip of your index finger determines the volume.
